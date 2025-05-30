@@ -1,54 +1,51 @@
-# Snowstorm-Local
+# 🧊 Snowstorm-Local Setup Guide
 
-This document is a user guide for launching the **Snowstorm terminology server**, customized by **E-health**.
-The forked repository is available here: [https://github.com/ehealthplatformstandards/snowstorm](https://github.com/ehealthplatformstandards/snowstorm).
+This document is a step-by-step guide to launching the containerized **Snowstorm terminology server**, customized by **E-health**. It includes default behavior, customization tips, and verification steps to ensure everything runs smoothly.
 
-Snowstorm supports multiple terminologies (see \[**syndication-terminologies.md**]) and offers flexible control over which ones are loaded at startup (see \[**syndication-on-startup.md**]).
-Some terminologies can also be updated during runtime—see \[**syndication-on-runtime.md**] for more details.
+📎 **GitHub Repository**: [https://github.com/ehealthplatformstandards/snowstorm](https://github.com/ehealthplatformstandards/snowstorm)
 
-This guide describes the minimal steps required to launch the server using the default setup.
+Snowstorm supports multiple terminologies. For more details:
+- [**Supported Terminologies**](syndication/syndication-terminologies.md)
+- [**Startup Configuration**](syndication/syndication-on-startup.md)
+- [**Runtime Updates**](syndication/syndication-on-runtime.md)
 
 ---
 
 ## 🚀 Quick Launch Overview
 
-If the provided `docker-compose.yml` file is used without modification, the following terminologies will be imported at startup:
+Using the default `docker-compose.yml`, the following terminologies are **imported** at runtime startup:
 
-* **ATC**, **BCP13**, **BCP47**, **ISO3166**, **ISO3166-2**, **UCUM**
+- **ATC**, **BCP13**, **BCP47**, **ISO3166**, **ISO3166-2**, **UCUM** *(embedded in Docker image)*
 
-These terminologies are embedded in the Docker image and require only import, not download.
+Additionally, the following are **downloaded and imported**:
+- The latest versions of **LOINC**, **HL7**, and **SNOMED CT** (including the **Belgian extension** and **international edition**)
 
-In addition, the most recent versions of **LOINC**, **HL7**, and **SNOMED CT** (including the Belgian extension and international edition) will be **downloaded and imported at runtime**.
+You can customize what to load via Docker launch arguments. ElasticSearch must be running and properly configured before starting Snowstorm.
 
-Other versions or terminology sets can be configured via application launch arguments (e.g. to load the SNOMED CT German extension).
-
-This guide assumes usage of `docker-compose`, but you are free to run Snowstorm in other environments (e.g. Docker Swarm, Kubernetes, etc.). 
-In both cases, ElasticSearch must be up and running and configured to work with Snowstorm. Snowstorm will fail to properly start, if ElasticSearch is not running/configured correctly.
-
-🕒 **Note**: The initial startup may take up to **40 minutes**, depending on internet speed and system performance.
+🕒 **Note**: Initial setup may take up to **40 minutes**, depending on internet speed and hardware.
 
 ---
 
-## ⚙️ Step 1: Configure the `.env` File
+## ⚙️ Step 1: (Optional) Create Accounts
 
-1. Set a **custom secret** for the `SYNDICATION_SECRET` environment variable.
-   This is required to enable terminology updates during runtime.
-
-2. To import **SNOMED CT** and **LOINC**, add your personal credentials (e.g., for the relevant licensing portals) to the `.env` file.
+To access **SNOMED** and **LOINC**, you must register if you don't already have an account:
+- SNOMED: [https://mlds.ihtsdotools.org/#/register](https://mlds.ihtsdotools.org/#/register) *(requires approval after account creation)*
+- LOINC: [https://loinc.org/join/](https://loinc.org/join/)
 
 ---
 
-## ⚙️ Step 2 (Optional): Customize Launch Configuration
+## ⚙️ Step 2: Configure `.env`
 
-The `docker-compose.yml` file contains a `command` section that controls what happens during container startup.
+Edit your `.env` file with the following:
 
-Key notes:
+- Set a **secure value** for `SYNDICATION_SECRET` to enable runtime updates.
+- Add credentials for **SNOMED CT** and **LOINC** download if using those terminologies.
 
-* Remove or comment out the `--syndication` argument if you do not want to import any terminology at startup.
-* Remove individual flags like `--hl7`, `--loinc`, or `--snomed` if you want to skip those specific imports.
-* You can specify custom versions for terminologies.
+---
 
-**Example**:
+## ⚙️ Step 3 (Optional): Customize Launch Options
+
+The `command` section of `docker-compose.yml` controls the behavior of Snowstorm at startup. Example:
 
 ```yaml
 command: [
@@ -63,20 +60,24 @@ command: [
   "--extension-country-code=BE"
 ]
 ```
-
 This configuration loads:
 
 * The latest **HL7** version
 * A specific version of the **SNOMED CT Belgian extension**
-* Other terminologies (**ATC**, **BCP13**, ... )enabled by the `--syndication` flag
+* Other terminologies (**ATC**, **BCP13**, ... ) enabled by the `--syndication` flag
 
 LOINC will **not** be imported in this example setup.
 
+📌 **Tips**:
+- Adjust ports (80, 8080, 9200) as needed in `docker-compose.yml`.
+- Remove `--syndication` to skip startup imports.
+- Use `--snomed` with version URI for specific SNOMED versions.
+
 ---
 
-## ▶️ Step 3: Start the Server
+## ▶️ Step 4: Start the Server
 
-To start the terminology server (including **Elasticsearch** and the **SNOMED CT Browser**), run:
+Launch Snowstorm and its dependencies:
 
 ```bash
 docker compose up
@@ -84,10 +85,35 @@ docker compose up
 
 ---
 
-## ✅ Step 4: Verify the Server
+## ✅ Step 5: Confirm Import Completion
 
-If the `--syndication` flag was used, the **ATC** terminology should have been imported.
-You can test this using the following command:
+Check if terminology import has finished:
+
+```bash
+curl --location 'localhost:8080/syndication/status?runningOnly=true'
+```
+
+An empty list `[]` means the import is complete. Example of an ongoing import response:
+
+```json
+[
+  {
+    "terminology": "hl7",
+    "requestedVersion": "latest",
+    "status": "RUNNING",
+    "timestamp": 1748526433979
+  }
+]
+```
+
+---
+
+## ✅ Step 6: Validate ATC Terminology
+
+If `--syndication` was used, **ATC** should be imported. Validate with:
+
+<details>
+<summary>🧾 cURL Request</summary>
 
 ```bash
 curl --location 'http://localhost:8080/fhir/CodeSystem/$validate-code?=null' \
@@ -126,7 +152,10 @@ curl --location 'http://localhost:8080/fhir/CodeSystem/$validate-code?=null' \
 }'
 ```
 
-**Expected response**:
+</details>
+
+<details>
+<summary>📥 Expected Response</summary>
 
 ```json
 {
@@ -156,9 +185,18 @@ curl --location 'http://localhost:8080/fhir/CodeSystem/$validate-code?=null' \
 }
 ```
 
+</details>
+
+---
+
+## 🧪 Postman Collection
+
+You can use this Postman collection to test your Snowstorm instance:
+
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/2126838-a60204ed-27e8-4c12-8358-ea58be02a431?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D2126838-a60204ed-27e8-4c12-8358-ea58be02a431%26entityType%3Dcollection%26workspaceId%3D2e13e762-0976-4818-a6d8-07850f2523ad)
+
 ---
 
 ## 📌 Legal Notice
 
 By using Snowstorm, you acknowledge and agree to the **terms and conditions** of each terminology source you import or use.
-
