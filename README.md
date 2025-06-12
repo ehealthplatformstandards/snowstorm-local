@@ -51,6 +51,7 @@ The `command` section of `docker-compose.yml` controls the behavior of Snowstorm
 command: [
   "--elasticsearch.urls=http://es:9200",
   "--syndication",
+  "--atc=https://raw.githubusercontent.com/ehealthplatformstandards/atc-terminology-publisher/main/atc-codesystem.csv"
   "--hl7",
   #"--hl7=6.1.0",
   #"--loinc",
