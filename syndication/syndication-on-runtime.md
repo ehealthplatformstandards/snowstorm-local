@@ -34,6 +34,7 @@ The request must be JSON-formatted and conform to the structure defined in `Synd
 ## 🔄 Custom-Version Terminologies
 
 Use this option for terminologies that are frequently updated (e.g., SNOMED CT extensions, LOINC). You can also **downgrade** to earlier versions or load **local** files.
+If the specified version is detected to already have been imported, the import won't be triggered.
 
 ### 📁 Local Imports
 
@@ -47,11 +48,13 @@ To use local terminology files:
 
 2. Use the version `"local"` in the request. The table below lists the appropriated paths and filename patterns to respect for each custom-version terminology.
 
-| Terminology | Path          | Filename Pattern                                |
-| ----------- | ------------- | ----------------------------------------------- |
-| HL7         | `/app/hl7`    | `hl7.terminology.*.tgz`                         |
-| LOINC       | `/app/loinc`  | `Loinc*.zip`                                    |
-| SNOMED CT   | `/app/snomed` | `snomed*edition*.zip` + `snomed*extension*.zip` |
+| Terminology | Path           | Filename Pattern                                |
+|-------------|----------------|-------------------------------------------------|
+| HL7         | `/app/hl7`     | `hl7.terminology.*.tgz`                         |
+| LOINC       | `/app/loinc`   | `Loinc*.zip`                                    |
+| SNOMED CT   | `/app/snomed`  | `snomed*edition*.zip` + `snomed*extension*.zip` |
+| ICD-10      | `/app/icd10`   | `*.zip`                                         |
+| ICD-10-BE   | `/app/icd10be` | `*.xlsx`                                        |
 
 ---
 
@@ -142,25 +145,30 @@ To use local terminology files:
 
 ## 📁 Fixed-Version Terminologies
 
-For terminologies with fixed versions (e.g. ISO, UCUM), this mode re-imports the terminology **from the container’s filesystem**.
+For terminologies with fixed versions (e.g. ISO, UCUM), this mode (re-)imports the terminology **from the container’s filesystem**.
+In case of ATC, this will fetch the latest version via a URL and then do the import.
+Note that for these terminologies, an import will be triggered in any case, even if the corresponding terminology file hasn't changed.
 
 ### ✅ Use Cases
 
-* Re-import a terminology without restarting the server
-* Load a manually updated file during runtime
+* Re-import a Fixed-Version terminology without restarting the server
+* Load a manually updated file during the container runtime and launch the import.
 
 > 📌 **File Naming Requirement**: Filenames must follow the `*-codesystem.*` pattern (e.g. `bcp13-codesystem.json`)
-
+>
+>️️ ⚠️ **ICPC2 terminology**: Since the file is not present on the docker image for licensing reasons, you must ensure the file has been copied to `/app/icpc2` before triggering the reimport
+>
 ### 📂 File Path Examples
 
-| Terminology | Path           | Example Filename                    |
-| ----------- | -------------- | ----------------------------------- |
-| ATC         | `/app/atc`     | `atc-codesystem.csv`                |
-| BCP13       | `/app/bcp13`   | `bcp13-application-codesystem.json` |
-| BCP47       | `/app/bcp47`   | `bcp47-codesystem.json`             |
-| ISO3166     | `/app/iso3166` | `iso3166-codesystem.json`           |
-| ISO3166-2   | `/app/iso3166` | `iso3166-2-codesystem.json`         |
-| UCUM        | `/ucum`        | `ucum-codesystem.xml`               |
+| Terminology | Path           | Example Filename                              |
+|------------|----------------|-----------------------------------------------|
+| ATC        | `/app/atc`     | `atc-codesystem.csv`                          |
+| BCP13      | `/app/bcp13`   | `bcp13-application-codesystem.json`           |
+| BCP47      | `/app/bcp47`   | `bcp47-codesystem.json`                       |
+| ISO3166    | `/app/iso3166` | `iso3166-codesystem.json`                     |
+| ISO3166-2  | `/app/iso3166` | `iso3166-2-codesystem.json`                   |
+| UCUM       | `/app/ucum`    | `ucum-codesystem.xml`                         |
+| ICPC-2     | `/app/icpc2`   | `icpc2-codesystem.txt` |
 
 ### 🏷️ Supported Values
 
@@ -172,12 +180,13 @@ For terminologies with fixed versions (e.g. ISO, UCUM), this mode re-imports the
 | ISO3166     | `iso3166`        |
 | M49         | `m49`            |
 | UCUM        | `ucum`           |
+| ICPC-2      | `icpc2`          |
 
 ### ▶️ Example: Re-import BCP13
 
 ```json
 {
-  "terminologyName": "bcp13",
-  "syndicationSecret": "theSecret"
+   "terminologyName": "bcp13",
+   "syndicationSecret": "theSecret"
 }
 ```

@@ -53,6 +53,7 @@ services:
     command: [
       "--elasticsearch.urls=http://es:9200",
       "--syndication", # uncomment to import below terminologies + the default ones (ISO3166 etc)
+      #"--atc=https://raw.githubusercontent.com/ehealthplatformstandards/atc-terminology-publisher/main/atc-codesystem.csv",  # ensure the copyright is respected for your use-case before enabling (https://atcddd.fhi.no/copyright_disclaimer/)
       "--hl7",
       #"--hl7=6.1.0",
       "--snomed=http://snomed.info/sct/11000172109", # latest belgian extension (+ international edition dependency)
@@ -60,6 +61,11 @@ services:
       "--extension-country-code=BE", # The snomed extension country code (ISO 3166-1 alpha-2), mandatory when loading snomed extensions
       "--loinc",
       #"--loinc=2.78",
+      #"--icd10",
+      #"--icd10=2019", # see available years on https://icdcdn.who.int/icd10/index.html
+      #"--icd10-be",
+      #"--icd10-be=2023", # see available years on https://www.health.belgium.be/fr/sante/organisation-des-soins-de-sante/hopitaux/systemes-denregistrement/icd-10-be/publications#reflist
+      #"--icpc2",
     ]
 
   browser:
