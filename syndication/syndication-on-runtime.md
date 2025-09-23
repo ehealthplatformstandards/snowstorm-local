@@ -1,42 +1,80 @@
 # 🩺 Runtime Syndication API Guide
 
 This guide explains how to **dynamically import or update clinical terminology versions** in a Snowstorm-based application **after it has fully started** and completed its initial import process.
+Please note that these terminology updates won't prevent the terminologies (the one being updated included) from being used.
+There are two options available:
+
+1. **Automated updates** using a CRON job.
+2. **Manual updates** via the REST API endpoint.
 
 ---
 
-## 📌 API Endpoint
+## 📌 Automated Updates with a CRON Job
 
-The following endpoint allows **runtime terminology updates** without requiring a server restart. It is designed for **system administrators** who need to manage terminology data on-the-fly.
+The CRON job is **disabled by default**. To enable it, set the `SYNDICATION_CRON` environment variable.
+You can configure it the same way as SNOMED or LOINC credentials — for example, by defining it in your `.env` file.
+
+**Example configuration:**
+
+```properties
+SYNDICATION_CRON=0 0 0 * * *
+```
+
+This will trigger the syndication process **once every day at midnight**.
+
+✅ **Advantages:**
+
+* Automatically keeps your terminology data up to date.
+* No need to restart the Snowstorm container.
+
+⚠️ **Important notes:**
+
+* Updates only work if the terminology is configured with `latest`.
+
+   * Example: `--hl7=latest` or `--hl7` ✅
+   * Example: `--hl7=6.1.0` ❌ (specific version, will not update)
+* **Fixed-version terminologies** (except for **ATC** and **ICPC-2**) will not be updated automatically. These terminologies are embedded in the Docker image and are not subject to change.
+
+---
+
+## 📌 Manual Updates with the API
+
+If you need immediate control, you can trigger a terminology import at runtime via the following endpoint:
 
 ```http
 PUT /syndication/import
 ```
 
----
+This method is useful for **system administrators** who want to:
 
-## 📝 Overview
+* Force updates on demand.
+* Retry a failed import.
+* Test updates in controlled scenarios.
+
+### 📝 Overview
 
 Calling this endpoint triggers a **background job** that imports or updates a clinical terminology. It supports:
 
 * **Versioned terminologies** (e.g. SNOMED CT, LOINC, HL7 FHIR)
 * **Fixed-code terminologies** (e.g. ISO standards, UCUM)
 
-> ⚠️ **Security Requirement**: A `syndicationSecret` must be included in the request body. This secret must match the value configured in the application’s environment (see `syndication-terminologies.md`) to prevent unauthorized access.
+> ⚠️ **Security Requirement**: A `syndicationSecret` must be included in the request body. This secret must match the value configured in the `SYNDICATION_SECRET` environment variable to prevent unauthorized access to non-admin users.
+> The `SYNDICATION_SECRET` environment variable acts as a basic protection mechanism for the `PUT /syndication/import` endpoint
 
 ---
 
-## 📦 Request Format
+### 📦 Request Format
 
 The request must be JSON-formatted and conform to the structure defined in `SyndicationImportRequest.java`.
 
 ---
 
-## 🔄 Custom-Version Terminologies
+### 🔄 Custom-Version Terminologies
 
 Use this option for terminologies that are frequently updated (e.g., SNOMED CT extensions, LOINC). You can also **downgrade** to earlier versions or load **local** files.
 If the specified version is detected to already have been imported, the import won't be triggered.
 
-### 📁 Local Imports
+#### 📁 Local Imports
 
 To use local terminology files:
 
@@ -58,9 +96,9 @@ To use local terminology files:
 
 ---
 
-### ▶️ Examples
+#### ▶️ Examples
 
-#### ✅ LOINC – Latest Version
+##### ✅ LOINC – Latest Version
 
 ```json
 {
@@ -69,7 +107,7 @@ To use local terminology files:
 }
 ```
 
-#### 📌 LOINC – Specific Version (2.80)
+##### 📌 LOINC – Specific Version (2.80)
 
 ```json
 {
@@ -79,7 +117,7 @@ To use local terminology files:
 }
 ```
 
-#### 🗂️ LOINC – Local File
+##### 🗂️ LOINC – Local File
 
 ```json
 {
@@ -89,7 +127,7 @@ To use local terminology files:
 }
 ```
 
-#### 🌍 SNOMED CT – Latest BE Extension + International Edition
+##### 🌍 SNOMED CT – Latest BE Extension + International Edition
 
 ```json
 {
@@ -100,7 +138,7 @@ To use local terminology files:
 }
 ```
 
-#### 📌 SNOMED CT – Specific Version
+##### 📌 SNOMED CT – Specific Version
 
 ```json
 {
@@ -111,7 +149,7 @@ To use local terminology files:
 }
 ```
 
-#### 🗂️ SNOMED CT – Local Import
+##### 🗂️ SNOMED CT – Local Import
 
 ```json
 {
@@ -122,7 +160,7 @@ To use local terminology files:
 }
 ```
 
-#### ✅ HL7 – Latest Version
+##### ✅ HL7 – Latest Version
 
 ```json
 {
@@ -131,7 +169,7 @@ To use local terminology files:
 }
 ```
 
-#### 🗂️ HL7 – Local File
+##### 🗂️ HL7 – Local File
 
 ```json
 {
@@ -143,13 +181,13 @@ To use local terminology files:
 
 ---
 
-## 📁 Fixed-Version Terminologies
+### 📁 Fixed-Version Terminologies
 
 For terminologies with fixed versions (e.g. ISO, UCUM), this mode (re-)imports the terminology **from the container’s filesystem**.
-In case of ATC, this will fetch the latest version via a URL and then do the import.
+In case of ATC and ICPC-2, this will fetch the latest version via a URL and then do the import.
 Note that for these terminologies, an import will be triggered in any case, even if the corresponding terminology file hasn't changed.
 
-### ✅ Use Cases
+#### ✅ Use Cases
 
 * Re-import a Fixed-Version terminology without restarting the server
 * Load a manually updated file during the container runtime and launch the import.
@@ -158,7 +196,7 @@ Note that for these terminologies, an import will be triggered in any case, even
 >
 >️️ ⚠️ **ICPC2 terminology**: Since the file is not present on the docker image for licensing reasons, you must ensure the file has been copied to `/app/icpc2` before triggering the reimport
 >
-### 📂 File Path Examples
+#### 📂 File Path Examples
 
 | Terminology | Path           | Example Filename                              |
 |------------|----------------|-----------------------------------------------|
@@ -170,7 +208,7 @@ Note that for these terminologies, an import will be triggered in any case, even
 | UCUM       | `/app/ucum`    | `ucum-codesystem.xml`                         |
 | ICPC-2     | `/app/icpc2`   | `icpc2-codesystem.txt` |
 
-### 🏷️ Supported Values
+#### 🏷️ Supported Values
 
 | Terminology | Value in Request |
 | ----------- | ---------------- |
@@ -182,7 +220,7 @@ Note that for these terminologies, an import will be triggered in any case, even
 | UCUM        | `ucum`           |
 | ICPC-2      | `icpc2`          |
 
-### ▶️ Example: Re-import BCP13
+#### ▶️ Example: Re-import BCP13
 
 ```json
 {
