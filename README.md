@@ -218,11 +218,18 @@ curl --location 'http://localhost:8080/fhir/CodeSystem/$validate-code?=null' \
 
 ---
 
-## 🧪 Postman Collection
+## 🧪 Postman Collections
 
-You can use this Postman collection to test your Snowstorm instance:
+You can use the following Postman collections to test your Snowstorm instance. Import them directly into Postman:
 
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/2126838-a60204ed-27e8-4c12-8358-ea58be02a431?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D2126838-a60204ed-27e8-4c12-8358-ea58be02a431%26entityType%3Dcollection%26workspaceId%3D2e13e762-0976-4818-a6d8-07850f2523ad)
+- [Snowstorm v8, FHIR R4 KAD](postman_collections/Snowstorm%20v8,%20FHIR%20R4.postman_collection.json)
+- [Snowstorm v10, FHIR-athon 2026](postman_collections/Snowstorm%20v10,%20FHIR-athon%202026.postman_collection.json)
+
+**How to import:**
+1. Open Postman
+2. Click **Import** (top-left)
+3. Select the collection JSON file from the `postman_collections/` folder
+4. The collection will be ready to use
 
 ---
 
