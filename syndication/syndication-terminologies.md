@@ -49,7 +49,7 @@ These terminologies can be loaded in three different ways:
 ### ICD10-BE terminology
 - 📦 Contains ICD10-CM and ICD-10-PCS codes along with Dutch and French translations
 - ⏱️ Import Time: ~1 min
-- 🌐 Source: [FPS Health](https://www.health.belgium.be/fr/sante/organisation-des-soins-de-sante/hopitaux/systemes-denregistrement/icd-10-be/publications#reflist)
+- 🌐 Source: [FPS Health](https://apps.health.belgium.be/terminology-portal/standards/classification_standards/icd/nl)
 - 📜 License: WHO ICD‑10 license (often free for non-commercial purposes) + Belgian authorization to reproduce or integrate ICD‑10‑BE codes or data
 ---
 
