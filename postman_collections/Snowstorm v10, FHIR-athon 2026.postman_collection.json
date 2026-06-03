@@ -1,0 +1,257 @@
+{
+  "info": {
+    "_postman_id": "d7c43fcf-4488-483a-b939-c0f4cd63511c",
+    "name": "Snowstorm v10, FHIR-athon 2026",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "24057067",
+    "_collection_link": "https://go.postman.co/collection/24057067-d7c43fcf-4488-483a-b939-c0f4cd63511c?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "List Code Systems",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{server}}/fhir/CodeSystem?_count=2000",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "fhir",
+            "CodeSystem"
+          ],
+          "query": [
+            {
+              "key": "_count",
+              "value": "2000"
+            }
+          ]
+        },
+        "description": "List all CodeSystem resources on the server. Results limited to 10."
+      },
+      "response": []
+    },
+    {
+      "name": "Find Code Systems by title BE edition",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{server}}/fhir/CodeSystem?title=BE edition",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "fhir",
+            "CodeSystem"
+          ],
+          "query": [
+            {
+              "key": "title",
+              "value": "BE edition"
+            }
+          ]
+        },
+        "description": "Find CodeSystem resources that match the supplied title."
+      },
+      "response": []
+    },
+    {
+      "name": "Lookup SNOMED concept by code",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{server}}/fhir/CodeSystem/$lookup?system=http://snomed.info/sct&code=24496007",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "fhir",
+            "CodeSystem",
+            "$lookup"
+          ],
+          "query": [
+            {
+              "key": "system",
+              "value": "http://snomed.info/sct"
+            },
+            {
+              "key": "code",
+              "value": "24496007"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Lookup SNOMED concept in fr-BE dialect",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{server}}/CodeSystem/$lookup?system=http://snomed.info/sct&code=50841000172109&displayLanguage=fr-BE",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "CodeSystem",
+            "$lookup"
+          ],
+          "query": [
+            {
+              "key": "system",
+              "value": "http://snomed.info/sct"
+            },
+            {
+              "key": "code",
+              "value": "50841000172109"
+            },
+            {
+              "key": "displayLanguage",
+              "value": "fr-BE"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Expand SNOMED refset by ECL",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{server}}/ValueSet/$expand?url=http://snomed.info/sct/11000172109/version/20260515?fhir_vs=ecl/%5E50841000172109&count=20",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "ValueSet",
+            "$expand"
+          ],
+          "query": [
+            {
+              "key": "url",
+              "value": "http://snomed.info/sct/11000172109/version/20260515?fhir_vs=ecl/%5E50841000172109"
+            },
+            {
+              "key": "count",
+              "value": "20"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Expand SNOMED refset by ECL (children)",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{server}}/ValueSet/$expand?url=http://snomed.info/sct/11000172109/version/20260515?fhir_vs=ecl/<<24496007&count=20",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "ValueSet",
+            "$expand"
+          ],
+          "query": [
+            {
+              "key": "url",
+              "value": "http://snomed.info/sct/11000172109/version/20260515?fhir_vs=ecl/<<24496007"
+            },
+            {
+              "key": "count",
+              "value": "20"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Expand SNOMED refset by ECL (parents)",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{server}}/ValueSet/$expand?url=http://snomed.info/sct/11000172109/version/20260515?fhir_vs=ecl/>>24496007&count=20",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "ValueSet",
+            "$expand"
+          ],
+          "query": [
+            {
+              "key": "url",
+              "value": "http://snomed.info/sct/11000172109/version/20260515?fhir_vs=ecl/>>24496007"
+            },
+            {
+              "key": "count",
+              "value": "20"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Expand SNOMED refset by ECL (with options)",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{server}}/ValueSet/$expand?url=http://snomed.info/sct/11000172109/version/20260515?fhir_vs=ecl/%5E50831000172102&count=20&displayLanguage=fr-BE&filter=grippe",
+          "host": [
+            "{{server}}"
+          ],
+          "path": [
+            "ValueSet",
+            "$expand"
+          ],
+          "query": [
+            {
+              "key": "url",
+              "value": "http://snomed.info/sct/11000172109/version/20260515?fhir_vs=ecl/%5E50831000172102"
+            },
+            {
+              "key": "count",
+              "value": "20"
+            },
+            {
+              "key": "displayLanguage",
+              "value": "fr-BE"
+            },
+            {
+              "key": "filter",
+              "value": "grippe"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
