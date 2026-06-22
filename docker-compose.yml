@@ -54,12 +54,12 @@ services:
       "--elasticsearch.urls=http://es:9200",
       "--syndication", # uncomment to import below terminologies + the default ones (ISO3166 etc)
       #"--atc=https://raw.githubusercontent.com/ehealthplatformstandards/atc-terminology-publisher/main/atc-codesystem.csv",  # ensure the copyright is respected for your use-case before enabling (https://atcddd.fhi.no/copyright_disclaimer/)
-      "--hl7",
+      #"--hl7",
       #"--hl7=6.1.0",
       "--snomed=http://snomed.info/sct/11000172109", # latest belgian extension (+ international edition dependency)
       #"--snomed=http://snomed.info/sct/11000172109/version/20250315", # specific version
       "--extension-country-code=BE", # The snomed extension country code (ISO 3166-1 alpha-2), mandatory when loading snomed extensions
-      "--loinc",
+      #"--loinc",
       #"--loinc=2.78",
       #"--icd10",
       #"--icd10=2019", # see available years on https://icdcdn.who.int/icd10/index.html
